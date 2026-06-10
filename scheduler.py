@@ -13,20 +13,17 @@ except ImportError:
 
 def _send_reminders(bot):
     now = datetime.now().strftime("%H:%M")
-    reminders = db_handler.get_all_reminders()
-    for user_id, reminder_time in reminders:
-        if reminder_time == now:
-            try:
-                from db_handler import already_recorded_today
-                if not already_recorded_today(user_id):
-                    bot.send_message(
-                        user_id,
-                        "⏰ <b>Ассаляму алейкум!</b> Не забудь записать свой день\n"
-                        "Нажми кнопку + Записать день",
-                        parse_mode="HTML",
-                    )
-            except Exception as e:
-                logger.error(f"Ошибка отправки напоминания {user_id}: {e}")
+    reminders = db_handler.get_users_with_reminder(now)  
+    for user in reminders:
+        user_id = user['telegram_id']
+        try:
+            bot.send_message(
+    user_id,
+    "*Напоминание!*\n\nНе забудь записать свой день",
+    parse_mode="Markdown"
+)
+        except Exception as e:
+            logger.error(f"Ошибка отправки {user_id}: {e}")
 
 def setup_scheduler(bot):
     if not HAS_SCHEDULER:
